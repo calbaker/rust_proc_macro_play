@@ -1,26 +1,30 @@
-#[derive(Debug)]
+use attr_macro::Describe;
+
+#[derive(Describe)]
 struct MyStruct {
-    x: i32,
+    my_string: String,
+    my_enum: MyEnum,
+    my_number: f64,
 }
 
-impl MyStruct {
-    fn double_x(&self) -> i32 {
-        self.x * 2
-    }
+#[derive(Describe)]
+struct MyTupleStruct(u32, String, i8);
+
+#[derive(Describe)]
+enum MyEnum {
+    VariantA,
+    VariantB,
 }
 
-pub fn main() {
-    let x = MyStruct { x: 5 };
-    println!("{:?}", x);
+#[derive(Describe)]
+union MyUnion {
+    unsigned: u32,
+    signed: i32,
 }
 
-#[cfg(test)]
-pub mod tests {
-    use super::*;
-
-    #[test]
-    fn double_x() {
-        let s = MyStruct { x: 1 };
-        assert_eq!(s.double_x(), 2);
-    }
+fn main() {
+    MyStruct::describe();
+    MyTupleStruct::describe();
+    MyEnum::describe();
+    MyUnion::describe();
 }
