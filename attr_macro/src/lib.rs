@@ -48,6 +48,9 @@ pub fn describe(input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn double(_input: TokenStream) -> TokenStream {
+    // TODO: make it so that this gets the struct as input
+    // then finds the field named my_number based on the fact that it's f64
+    // then creates a method that multiplies it by 2 and returns it
     "fn double_my_number(&self) -> f64 { self.my_number * 2. }"
         .parse()
         .unwrap()
