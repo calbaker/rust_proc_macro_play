@@ -1,10 +1,14 @@
-use attr_macro::Describe;
+use attr_macro::{Describe, double};
 
 #[derive(Describe)]
 struct MyStruct {
     my_string: String,
     my_enum: MyEnum,
     my_number: f64,
+}
+
+impl MyStruct {
+    double!();
 }
 
 #[derive(Describe)]
