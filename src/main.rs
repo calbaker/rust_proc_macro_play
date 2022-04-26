@@ -1,3 +1,5 @@
+// much of this code is bowrrowed from https://blog.logrocket.com/procedural-macros-in-rust/
+
 use attr_macro::{double, Describe};
 
 #[derive(Describe)]
