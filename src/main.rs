@@ -1,4 +1,4 @@
-use attr_macro::{Describe, double};
+use attr_macro::{double, Describe};
 
 #[derive(Describe)]
 struct MyStruct {
@@ -31,4 +31,10 @@ fn main() {
     MyTupleStruct::describe();
     MyEnum::describe();
     MyUnion::describe();
+    let mystruct = MyStruct {
+        my_string: "some str".to_string(),
+        my_enum: MyEnum::VariantA,
+        my_number: 2.0,
+    };
+    println!("my_number * 2: {}", mystruct.double_my_number());
 }
