@@ -2,9 +2,8 @@ extern crate proc_macro2;
 use proc_macro2::TokenStream as TokenStream2;
 extern crate proc_macro;
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::{parse_macro_input, DeriveInput, FieldsNamed};
-
+use quote::{format_ident, quote, ToTokens};
+use syn::{parse_macro_input, DeriveInput, FieldsNamed, Type};
 
 extern crate quote;
 extern crate syn;
@@ -20,16 +19,21 @@ pub fn double_f64(input: TokenStream) -> TokenStream {
             let fields = named.iter().map(|f| &f.ident);
             let ftypes = named.iter().map(|f| &f.ty);
 
-            for (i, (field, ftype)) in fields.into_iter().zip(ftypes).enumerate() {
-                // if stringify!(#ftype) == "f64" {
-                    if i == 2 || i == 1 {
+            for (field, ftype) in fields.into_iter().zip(ftypes.into_iter()) {
+                match ftype {
+                    Type::Path(type_path)
+                        if type_path.clone().into_token_stream().to_string() == "f64" =>
+                    {
                         let fname = format_ident!("double_{}", field.clone().unwrap());
-                    func_stream.extend::<TokenStream2>(quote! { fn #fname(&self) -> f64 { self.#field * 2.0 } });
-                }
+                        func_stream.extend::<TokenStream2>(
+                            quote! { fn #fname(&self) -> f64 { self.#field * 2.0 } },
+                        );
+                    }
+                    _ => {}
+                };
             }
         }
     };
-
 
     let output = quote! {
         impl #ident {
@@ -39,4 +43,3 @@ pub fn double_f64(input: TokenStream) -> TokenStream {
 
     output.into()
 }
-
