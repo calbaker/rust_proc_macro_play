@@ -48,34 +48,18 @@ pub fn describe(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(DoubleF64)]
 pub fn double_f64(input: TokenStream) -> TokenStream {
-    // TODO: make it so that this gets the struct as input
-    // then finds the field named my_number based on the fact that it's f64
-    // then creates a method that multiplies it by 2 and returns it
-
     let DeriveInput { ident, data, .. } = parse_macro_input!(input);
     let mut func_str = String::new();
 
-    // if let syn::Data::Struct(s) = data {
-    //     if let syn::Fields::Named(FieldsNamed { named, .. }) = s.fields {
-    //         let fields = named.iter().map(|f| &f.ident);
-    //         let ftypes = named.iter().map(|f| &f.ty);
-    //         for (field, ftype) in fields.into_iter().zip(ftypes) {
-    //             if stringify!(#ftype) == "f64" {
-    //                 func_str.push_str("fn double_my_number(&self) -> f64 { self.my_number * 2. }")
-    //             }
-    //         }
-    //     }
-    // }
-
-    let func_name = if let syn::Data::Struct(s) = data {
+    let (func_name, fident) = if let syn::Data::Struct(s) = data {
         if let syn::Fields::Named(FieldsNamed { named, .. }) = s.fields {
-            let fident = named[2].ident.clone().unwrap();
-            format_ident!("double_{}", fident)
+            let fident = named[1].ident.clone().unwrap();
+            (format_ident!("double_{}", fident), fident)
         } else {
-            format_ident!("jibberish")
+            (format_ident!(""), format_ident!(""))
         }
     } else {
-        format_ident!("jibberish")
+        (format_ident!(""), format_ident!(""))
     };
 
     let output = quote! {
@@ -84,7 +68,7 @@ pub fn double_f64(input: TokenStream) -> TokenStream {
             // fn double_f64(&self) -> f64 {
             //     self.my_number * 2.
             // }
-            fn #func_name(&self) -> f64 { self.my_number * 2. }
+            fn #func_name(&self) -> f64 { self.#fident * 2. }
         }
     };
 
