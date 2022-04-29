@@ -1,32 +1,42 @@
+extern crate proc_macro2;
+use proc_macro2::TokenStream as TokenStream2;
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, DeriveInput, FieldsNamed};
 
+
+extern crate quote;
+extern crate syn;
+
 #[proc_macro_derive(DoubleF64)]
 pub fn double_f64(input: TokenStream) -> TokenStream {
     let DeriveInput { ident, data, .. } = parse_macro_input!(input);
 
-    let (func_name, fident) = if let syn::Data::Struct(s) = data {
+    let mut func_stream = TokenStream2::default();
+
+    if let syn::Data::Struct(s) = data {
         if let syn::Fields::Named(FieldsNamed { named, .. }) = s.fields {
-            let f = named[1].ident.clone().unwrap();
-            (format_ident!("double_{}", f), f)
-        } else {
-            (format_ident!(""), format_ident!(""))
+            let fields = named.iter().map(|f| &f.ident);
+            let ftypes = named.iter().map(|f| &f.ty);
+
+            for (i, (field, ftype)) in fields.into_iter().zip(ftypes).enumerate() {
+                // if stringify!(#ftype) == "f64" {
+                    if i == 2 || i == 1 {
+                        let fname = format_ident!("double_{}", field.clone().unwrap());
+                    func_stream.extend::<TokenStream2>(quote! { fn #fname(&self) -> f64 { self.#field * 2.0 } });
+                }
+            }
         }
-    } else {
-        (format_ident!(""), format_ident!(""))
     };
+
 
     let output = quote! {
         impl #ident {
-            // func_str.parse.unwrap();
-            // fn double_f64(&self) -> f64 {
-            //     self.my_number * 2.
-            // }
-            fn #func_name(&self) -> f64 { self.#fident * 2. }
+            #func_stream
         }
     };
 
     output.into()
 }
+
