@@ -1,16 +1,12 @@
 // much of this code is bowrrowed from https://blog.logrocket.com/procedural-macros-in-rust/
 
-use attr_macro::{double, Describe};
+use attr_macro::{Describe, DoubleF64};
 
-#[derive(Describe)]
+#[derive(Describe, DoubleF64)]
 struct MyStruct {
     my_string: String,
     my_enum: MyEnum,
     my_number: f64,
-}
-
-impl MyStruct {
-    double!();
 }
 
 #[derive(Describe)]
@@ -38,5 +34,5 @@ fn main() {
         my_enum: MyEnum::VariantA,
         my_number: 2.0,
     };
-    println!("my_number * 2: {}", mystruct.double_my_number());
+    println!("my_number * 2: {}", mystruct.double_f64());
 }
