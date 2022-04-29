@@ -18,3 +18,19 @@ fn main() {
     println!("my_number * 2: {}", mystruct.double_my_number());
     println!("my_other_number * 2: {}", mystruct.double_my_other_number());
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_double() {
+        let mystruct = MyStruct {
+            my_string: "some str".to_string(),
+            my_number: 2.0,
+            my_other_number: 17.0,
+        };
+        assert_eq!(mystruct.double_my_number(), 4.0);
+        assert_eq!(mystruct.double_my_other_number(), 34.0);
+    }
+}
