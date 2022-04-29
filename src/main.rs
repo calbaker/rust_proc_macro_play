@@ -1,8 +1,8 @@
 // much of this code is bowrrowed from https://blog.logrocket.com/procedural-macros-in-rust/
 
-use attr_macro::{Describe, DoubleF64};
+use proc_macro::DoubleF64;
 
-#[derive(Describe, DoubleF64)]
+#[derive(DoubleF64)]
 struct MyStruct {
     my_string: String,
     my_number: f64,
@@ -11,7 +11,6 @@ struct MyStruct {
 
 
 fn main() {
-    MyStruct::describe();
     let mystruct = MyStruct {
         my_string: "some str".to_string(),
         my_number: 2.0,
