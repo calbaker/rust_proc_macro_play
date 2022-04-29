@@ -1,6 +1,6 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
-use quote::{quote, format_ident};
+use quote::{format_ident, quote};
 use syn::{parse_macro_input, DataEnum, DataUnion, DeriveInput, FieldsNamed, FieldsUnnamed};
 
 #[proc_macro_derive(Describe)]
@@ -53,7 +53,6 @@ pub fn double_f64(input: TokenStream) -> TokenStream {
     // then creates a method that multiplies it by 2 and returns it
 
     let DeriveInput { ident, data, .. } = parse_macro_input!(input);
-    let mut func_str = String::new();
 
     // if let syn::Data::Struct(s) = data {
     //     if let syn::Fields::Named(FieldsNamed { named, .. }) = s.fields {
@@ -67,24 +66,38 @@ pub fn double_f64(input: TokenStream) -> TokenStream {
     //     }
     // }
 
-    let func_name = if let syn::Data::Struct(s) = data {
+    let mut func_stream = "".to_string();
+
+    if let syn::Data::Struct(s) = data {
         if let syn::Fields::Named(FieldsNamed { named, .. }) = s.fields {
-            let fident = named[2].ident.clone().unwrap();
-            format_ident!("double_{}", fident)
-        } else {
-            format_ident!("jibberish")
+            let fields = named.iter().map(|f| &f.ident);
+            let ftypes = named.iter().map(|f| &f.ty);
+
+            for (i, (field, ftype)) in fields.into_iter().zip(ftypes).enumerate() {
+                if i == 2
+                /* stringify!(#ftype) == "f64" */
+                {
+                    let fident = field.clone().unwrap();
+                    func_stream.push_str(
+                        &format_ident!(
+                            "fn double_{}(&self) -> f64 {}self.{} * 2.{}",
+                            fident,
+                            "{",
+                            fident,
+                            "}"
+                        )
+                        .to_string(),
+                    );
+                }
+            }
         }
-    } else {
-        format_ident!("jibberish")
     };
+
+    let func_stream = format_ident!("{}", &func_stream);
 
     let output = quote! {
         impl #ident {
-            // func_str.parse.unwrap();
-            // fn double_f64(&self) -> f64 {
-            //     self.my_number * 2.
-            // }
-            fn #func_name(&self) -> f64 { self.my_number * 2. }
+            #func_stream
         }
     };
 
