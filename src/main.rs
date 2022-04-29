@@ -34,5 +34,5 @@ fn main() {
         my_enum: MyEnum::VariantA,
         my_number: 2.0,
     };
-    println!("my_number * 2: {}", mystruct.double_f64());
+    println!("my_number * 2: {}", mystruct.double_my_number());
 }
