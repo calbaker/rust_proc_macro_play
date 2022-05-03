@@ -9,7 +9,6 @@ edition = "2021"
 proc-macro2 = "1.0.37"
 quote = "1.0.18"
 syn = {version = "1.0.91", features = ["extra-traits"]}
-si_api = { path = "../si_api" }
 pyo3 = { version = "0.15.1", features = ["extension-module"] }
 
 [lib]

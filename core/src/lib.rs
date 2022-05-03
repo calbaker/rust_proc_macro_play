@@ -1,11 +1,11 @@
-extern crate si_api;
-use si_api as si;
 extern crate uom;
 use uom::typenum;
 extern crate pyo3;
 use pyo3::prelude::*;
 extern crate proc_macros;
 use proc_macros::ImplPyo3Get;
+
+mod si;
 
 #[pyclass]
 #[derive(Clone, Debug, ImplPyo3Get)]
@@ -99,8 +99,11 @@ impl Default for TimeTrace {
 }
 
 #[derive(Clone, Debug)]
+#[pyclass]
 pub struct TrainSimulation {
+    #[pyo3(get)]
     pub tt: TimeTrace,
+    #[pyo3(get)]
     pub loco_con: LocomotiveConsist,
 }
 
@@ -126,6 +129,16 @@ impl TrainSimulation {
             self.step();
         }
     }
+}
+
+#[pymodule]
+fn core(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_class::<FuelConverter>()?;
+    m.add_class::<FuelConverterState>()?;
+    m.add_class::<LocomotiveConsist>()?;
+    m.add_class::<TimeTrace>()?;
+    m.add_class::<TrainSimulation>()?;
+    Ok(())
 }
 
 #[cfg(test)]
