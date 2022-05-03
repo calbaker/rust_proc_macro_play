@@ -1,7 +1,7 @@
 extern crate proc_macro2;
 use proc_macro2::TokenStream as TokenStream2;
 extern crate proc_macro;
-use proc_macro::{TokenStream, TokenTree};
+use proc_macro::TokenStream ;
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, DeriveInput, FieldsNamed, Type};
 

@@ -8,7 +8,7 @@ use proc_macros::ImplPyo3Get;
 mod si;
 
 #[pyclass]
-#[derive(Clone, Debug, ImplPnyo3Get)]
+#[derive(Clone, Debug, ImplPyo3Get)]
 pub struct FuelConverter {
     #[pyo3(get)]
     pub state: FuelConverterState,
