@@ -137,4 +137,11 @@ mod tests {
         ts.walk();
         assert_eq!(ts.loco_con.fc.state.energy.get::<si::joule>(), 328350.0);
     }
+
+    #[test]
+    pub fn test_get_pwr_max() {
+        let mut ts = super::TrainSimulation::default();
+        ts.walk();
+        assert_eq!(ts.loco_con.fc.get_pwr_max_watts(), 100.0);
+    }
 }

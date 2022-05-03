@@ -157,6 +157,7 @@ name = "proc_macros"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
+ "pyo3",
  "quote",
  "si_api",
  "syn",
