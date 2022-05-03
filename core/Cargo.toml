@@ -1,5 +1,5 @@
 [package]
-name = "use_attr_macro"
+name = "core"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 si_api = { path = "../si_api" }
+pyo3 = { version = "0.15.1", features = ["extension-module"] }
 uom = { features = ["use_serde"], git = "https://github.com/groscoe2/uom" }
+proc_macros = { path = "../proc_macros" }

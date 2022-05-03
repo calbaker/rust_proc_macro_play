@@ -2,12 +2,20 @@ extern crate si_api;
 use si_api as si;
 extern crate uom;
 use uom::typenum;
+extern crate pyo3;
+use pyo3::prelude::*;
+extern crate proc_macros;
+use proc_macros::ImplPyo3Get;
 
-struct FuelConverter {
-    state: FuelConverterState,
-    history: Vec<FuelConverterState>,
-    pwr_max: si::Power,
-    eta: si::Ratio,
+#[pyclass]
+#[derive(Clone, Debug, ImplPyo3Get)]
+pub struct FuelConverter {
+    #[pyo3(get)]
+    pub state: FuelConverterState,
+    #[pyo3(get)]
+    pub history: Vec<FuelConverterState>,
+    pub pwr_max: si::Power,
+    pub eta: si::Ratio,
 }
 
 impl Default for FuelConverter {
@@ -30,11 +38,13 @@ impl FuelConverter {
     }
 }
 
-#[derive(Clone, Debug)]
-struct FuelConverterState {
-    i: usize,
-    pwr: si::Power,
-    energy: si::Energy,
+#[derive(Clone, Copy, Debug)]
+#[pyclass]
+pub struct FuelConverterState {
+    #[pyo3(get)]
+    pub i: usize,
+    pub pwr: si::Power,
+    pub energy: si::Energy,
 }
 
 impl Default for FuelConverterState {
@@ -47,14 +57,18 @@ impl Default for FuelConverterState {
     }
 }
 
-struct LocomotiveConsist {
-    fc: FuelConverter,
+#[pyclass]
+#[derive(Clone, Debug)]
+pub struct LocomotiveConsist {
+    pub fc: FuelConverter,
+    pub orphaned: bool,
 }
 
 impl Default for LocomotiveConsist {
     fn default() -> Self {
         Self {
             fc: FuelConverter::default(),
+            orphaned: false,
         }
     }
 }
@@ -65,9 +79,12 @@ impl LocomotiveConsist {
     }
 }
 
-struct TimeTrace {
-    time: Vec<si::Time>,
-    speed: Vec<si::Velocity>,
+#[pyclass]
+#[derive(Clone, Debug)]
+pub struct TimeTrace {
+    pub time: Vec<si::Time>,
+    pub speed: Vec<si::Velocity>,
+    pub orphaned: bool,
 }
 
 impl Default for TimeTrace {
@@ -76,13 +93,15 @@ impl Default for TimeTrace {
         Self {
             speed: speed.clone(),
             time: (0..speed.len()).map(|x| si::S * x as f64).collect(),
+            orphaned: false,
         }
     }
 }
 
-struct TrainSimulation {
-    tt: TimeTrace,
-    loco_con: LocomotiveConsist,
+#[derive(Clone, Debug)]
+pub struct TrainSimulation {
+    pub tt: TimeTrace,
+    pub loco_con: LocomotiveConsist,
 }
 
 impl Default for TrainSimulation {

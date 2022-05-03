@@ -9,5 +9,7 @@ name = "core_api"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.15.1", features = ["extension-module"] }
+pyo3 = { version = "0.15.1", features = ["extension-module", "multiple-pymethods"] }
 proc_macros = { path = "../proc_macros" }
+core = { path = "../core" }
+inventory = "0.2.3"

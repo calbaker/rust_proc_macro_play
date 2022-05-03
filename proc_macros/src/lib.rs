@@ -6,10 +6,15 @@ use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, DeriveInput, FieldsNamed, Type};
 
 extern crate quote;
+extern crate si_api;
 extern crate syn;
+use si_api as si;
 
-#[proc_macro_derive(DoubleF64)]
-pub fn double_f64(input: TokenStream) -> TokenStream {
+// could make it so that presence or absence of `orphaned` is determines whether setters are created
+
+/// macro for creating appropriate setters and getters for pyo3 struct attributes
+#[proc_macro_derive(ImplPyo3Get)]
+pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
     let DeriveInput { ident, data, .. } = parse_macro_input!(input);
 
     let mut func_stream = TokenStream2::default();
@@ -20,17 +25,21 @@ pub fn double_f64(input: TokenStream) -> TokenStream {
             let ftypes = named.iter().map(|f| &f.ty);
 
             for (field, ftype) in fields.into_iter().zip(ftypes.into_iter()) {
-                match ftype {
-                    Type::Path(type_path)
-                        if type_path.clone().into_token_stream().to_string() == "f64" =>
-                    {
-                        let fname = format_ident!("double_{}", field.clone().unwrap());
-                        func_stream.extend::<TokenStream2>(
-                            quote! { fn #fname(&self) -> f64 { self.#field * 2.0 } },
-                        );
+                println!("ftype: {:?}", ftype);
+                if let Type::Path(type_path) = ftype {
+                    if type_path.clone().into_token_stream().to_string() == "power" {
+                    let fname = format_ident!("get_{}_watts", field.clone().unwrap());
+                    func_stream.extend::<TokenStream2>(
+                    quote! { fn #fname(&self) -> f64 { self.#field.get::<si::watt>() } },
+                    );
+                    } else if type_path.clone().into_token_stream().to_string() == "ratio" {
+                    let fname = format_ident!("get_{}", field.clone().unwrap());
+                    func_stream.extend::<TokenStream2>(
+                    quote! { fn #fname(&self) -> f64 { self.#field.get::<si::ratio>() }
+                    },
+                    );
                     }
-                    _ => {}
-                };
+                    }
             }
         }
     };
