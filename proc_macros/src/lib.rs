@@ -22,24 +22,24 @@ pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
             let fields = named.iter().map(|f| &f.ident);
 
             // TODO: figure out how to make orphaned detect if it's present and true or false
-            let orphaned_present: bool = fields
-                .clone()
-                .any(|f| f.as_ref().map(|f| f.to_string()).unwrap_or_default() == "orphaned");
-            let orphaned = if orphaned_present {
-                let orphaned_idx = fields.clone().position(|f| {
-                    f.as_ref().map(|f| f.to_string()).unwrap_or_default() == "orphaned"
-                });
-                let orphaned_value = TokenStream::from(
-                    fields
-                        .clone()
-                        .nth(orphaned_idx.unwrap())
-                        .unwrap()
-                        .to_token_stream(),
-                );
-                false
-            } else {
-                false
-            };
+            // let orphaned_present: bool = fields
+            //     .clone()
+            //     .any(|f| f.as_ref().map(|f| f.to_string()).unwrap_or_default() == "orphaned");
+            // let orphaned = if orphaned_present {
+            //     let orphaned_idx = fields.clone().position(|f| {
+            //         f.as_ref().map(|f| f.to_string()).unwrap_or_default() == "orphaned"
+            //     });
+            //     let orphaned_value = TokenStream::from(
+            //         fields
+            //             .clone()
+            //             .nth(orphaned_idx.unwrap())
+            //             .unwrap()
+            //             .to_token_stream(),
+            //     );
+            //     false
+            // } else {
+            //     false
+            // };
             // all code above here is doing nothing until it gets fixed
 
             let ftypes = named.iter().map(|f| &f.ty);
