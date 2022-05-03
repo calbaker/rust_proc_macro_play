@@ -16,6 +16,7 @@ pub struct FuelConverter {
     pub history: Vec<FuelConverterState>,
     pub pwr_max: si::Power,
     pub eta: si::Ratio,
+    pub orphaned: bool,
 }
 
 impl Default for FuelConverter {
@@ -25,6 +26,7 @@ impl Default for FuelConverter {
             history: Vec::new(),
             pwr_max: si::W * 100.0,
             eta: si::R * 0.8,
+            orphaned: false,
         }
     }
 }
@@ -38,7 +40,7 @@ impl FuelConverter {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug, ImplPyo3Get)]
 #[pyclass]
 pub struct FuelConverterState {
     #[pyo3(get)]
@@ -58,18 +60,26 @@ impl Default for FuelConverterState {
 }
 
 #[pyclass]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct LocomotiveConsist {
     pub fc: FuelConverter,
     pub orphaned: bool,
 }
 
-impl Default for LocomotiveConsist {
-    fn default() -> Self {
-        Self {
-            fc: FuelConverter::default(),
-            orphaned: false,
-        }
+#[pymethods]
+impl LocomotiveConsist {
+    #[getter]
+    pub fn get_fc(&self) -> FuelConverter {
+        let mut fc = self.fc.clone();
+        fc.orphaned = true;
+        fc
+    }
+    #[setter]
+
+    pub fn set_fc(&self, fc: FuelConverter) -> PyResult<()> {
+        let mut fc = self.fc.clone();
+        fc.orphaned = false;
+        Ok(())
     }
 }
 
@@ -98,7 +108,7 @@ impl Default for TimeTrace {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 #[pyclass]
 pub struct TrainSimulation {
     #[pyo3(get)]
@@ -107,15 +117,7 @@ pub struct TrainSimulation {
     pub loco_con: LocomotiveConsist,
 }
 
-impl Default for TrainSimulation {
-    fn default() -> Self {
-        Self {
-            tt: TimeTrace::default(),
-            loco_con: LocomotiveConsist::default(),
-        }
-    }
-}
-
+#[pymethods]
 impl TrainSimulation {
     pub fn step(&mut self) {
         let dt = self.tt.time[self.loco_con.fc.state.i];
@@ -128,6 +130,11 @@ impl TrainSimulation {
         for _ in 0..self.tt.time.len() - 1 {
             self.step();
         }
+    }
+
+    #[new]
+    pub fn __new__() -> Self {
+        Self::default()
     }
 }
 
@@ -153,7 +160,7 @@ mod tests {
 
     #[test]
     pub fn test_get_pwr_max() {
-        let mut ts = super::TrainSimulation::default();
+        let ts = super::TrainSimulation::default();
         // this method is created by the macro
         assert_eq!(ts.loco_con.fc.get_pwr_max_watts(), 100.0);
     }
