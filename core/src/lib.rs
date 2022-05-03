@@ -141,7 +141,7 @@ mod tests {
     #[test]
     pub fn test_get_pwr_max() {
         let mut ts = super::TrainSimulation::default();
-        ts.walk();
+        // this method is created by the macro
         assert_eq!(ts.loco_con.fc.get_pwr_max_watts(), 100.0);
     }
 }
