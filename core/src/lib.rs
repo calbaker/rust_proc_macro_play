@@ -1,6 +1,7 @@
 extern crate uom;
 use uom::typenum;
 extern crate pyo3;
+use pyo3::exceptions::PyAttributeError;
 use pyo3::prelude::*;
 extern crate proc_macros;
 use proc_macros::ImplPyo3Get;
@@ -16,6 +17,7 @@ pub struct FuelConverter {
     pub history: Vec<FuelConverterState>,
     pub pwr_max: si::Power,
     pub eta: si::Ratio,
+    #[pyo3(get)]
     pub orphaned: bool,
 }
 
