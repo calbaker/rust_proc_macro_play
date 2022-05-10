@@ -11,11 +11,13 @@ extern crate syn;
 // could make it so that presence or absence of `orphaned` is determines whether setters are created
 
 /// macro for creating appropriate setters and getters for pyo3 struct attributes
-#[proc_macro_derive(ImplPyo3Get)]
-pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
+#[proc_macro_attribute]
+pub fn impl_pyo3_get(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let input = item.clone();
     let DeriveInput { ident, data, .. } = parse_macro_input!(input);
 
-    let mut func_stream = TokenStream2::default();
+    let mut impl_block = TokenStream2::default();
+    impl_block.extend::<TokenStream2>(attr.into());
 
     if let syn::Data::Struct(s) = data {
         if let syn::Fields::Named(FieldsNamed { named, .. }) = s.fields {
@@ -35,7 +37,7 @@ pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
                 if let Type::Path(type_path) = ftype {
                     if type_path.clone().into_token_stream().to_string() == "si :: Power" {
                         let fname = format_ident!("get_{}_watts", field.clone().unwrap());
-                        func_stream.extend::<TokenStream2>(quote! {
+                        impl_block.extend::<TokenStream2>(quote! {
                             #[getter]
                             fn #fname(&self) -> f64 { self.#field.get::<si::watt>() }
                         });
@@ -43,7 +45,7 @@ pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
                             println!("got inside orphaned present");
 
                             let set_name = format_ident!("set_{}_watts", field.clone().unwrap());
-                            func_stream.extend::<TokenStream2>(quote! {
+                            impl_block.extend::<TokenStream2>(quote! {
                                 #[setter]
                                 fn #set_name(&mut self, value:f64) -> PyResult<()> {
                                     if !self.orphaned {
@@ -59,14 +61,14 @@ pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
                         }
                     } else if type_path.clone().into_token_stream().to_string() == "si :: Ratio" {
                         let fname = format_ident!("get_{}", field.clone().unwrap());
-                        func_stream.extend::<TokenStream2>(quote! {
+                        impl_block.extend::<TokenStream2>(quote! {
                             #[getter]
                             fn #fname(&self) -> f64 { self.#field.get::<si::ratio>()
                             }
                         });
                     } else if type_path.clone().into_token_stream().to_string() == "si :: Energy" {
                         let fname = format_ident!("get_{}_joules", field.clone().unwrap());
-                        func_stream.extend::<TokenStream2>(quote! {
+                        impl_block.extend::<TokenStream2>(quote! {
                             #[getter]
                             fn #fname(&self) -> f64 { self.#field.get::<si::joule>()
                             }
@@ -77,12 +79,14 @@ pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
         }
     };
 
-    let output = quote! {
+    let impl_block = quote! {
         #[pymethods]
         impl #ident {
-            #func_stream
+            #impl_block
         }
     };
 
+    let mut output: TokenStream2 = item.into();
+    output.extend(impl_block);
     output.into()
 }

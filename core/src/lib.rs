@@ -4,12 +4,17 @@ extern crate pyo3;
 use pyo3::exceptions::PyAttributeError;
 use pyo3::prelude::*;
 extern crate proc_macros;
-use proc_macros::ImplPyo3Get;
+use proc_macros::impl_pyo3_get;
 
 mod si;
 
 #[pyclass]
-#[derive(Clone, Debug, ImplPyo3Get)]
+#[derive(Clone, Debug)]
+#[impl_pyo3_get(
+    // optional struct-specific methods
+    pub fn orphaned_as_str(&self) -> String {format!("{:?}", self.orphaned)}
+    pub fn step_py(&mut self) {self.step(66666.0 * si::W, 66.0 * si::S)}
+)]
 pub struct FuelConverter {
     #[pyo3(get)]
     pub state: FuelConverterState,
@@ -42,7 +47,8 @@ impl FuelConverter {
     }
 }
 
-#[derive(Clone, Debug, ImplPyo3Get)]
+#[derive(Clone, Debug)]
+#[impl_pyo3_get]
 #[pyclass]
 pub struct FuelConverterState {
     #[pyo3(get)]
@@ -77,7 +83,6 @@ impl LocomotiveConsist {
         fc
     }
     #[setter]
-
     pub fn set_fc(&self, fc: FuelConverter) -> PyResult<()> {
         let mut fc = self.fc.clone();
         fc.orphaned = false;
@@ -165,5 +170,11 @@ mod tests {
         let ts = super::TrainSimulation::default();
         // this method is created by the macro
         assert_eq!(ts.loco_con.fc.get_pwr_max_watts(), 100.0);
+    }
+
+    #[test]
+    pub fn test_orhpaned_as_str() {
+        let fc = FuelConverter::default();
+        assert_eq!(fc.orphaned_as_str(), false.to_string());
     }
 }
