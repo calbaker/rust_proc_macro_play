@@ -21,7 +21,6 @@ pub fn impl_pyo3_get(input: TokenStream) -> TokenStream {
         if let syn::Fields::Named(FieldsNamed { named, .. }) = s.fields {
             let fields = named.iter().map(|f| &f.ident);
 
-            // TODO: figure out how to make orphaned detect if it's present and true or false
             let mut field_names = Vec::new();
             for field in fields.clone().into_iter() {
                 field_names.push(field.clone().unwrap().to_string());
